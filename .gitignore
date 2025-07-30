@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.env
+
+# VS Code
+.vscode/
+
+# FAISS index
+faiss_index/
+
+# Others
+*.log

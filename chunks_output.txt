@@ -1,0 +1,27 @@
+
+--- Chunk 1 ---
+from pdf2image import convert_from_path
+import pytesseract
+import os
+
+poppler_path = r"C:\Program Files\poppler-24.08.0\Library\bin"
+tesseract_cmd_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+pytesseract.pytesseract.tesseract_cmd = tesseract_cmd_path
+
+images = convert_from_path("sample_scanned.pdf", poppler_path=poppler_path)
+
+extracted_text = ""
+
+for image in images:
+    text = pytesseract.image_to_string(image)
+    extracted_text += text + "\n" + ("-"*40) + "\n"
+
+--- Chunk 2 ---
+with open("extracted_output.txt", "w", encoding="utf-8") as f:
+    f.write("Extraction done successfully\n\n")
+    f.write(extracted_text)
+
+print("Text saved to extracted_output.txt")
+
+print("\n Extracted Text:\n", extracted_text)
