@@ -1,14 +1,13 @@
-from obligation_extractor import extract_obligation_metadata
+import asyncio
+from database.obligation_repository import ObligationRepository
 
-# Simulated PDF text for demo
-sample_text = """
-The bank shall maintain a CRR of 4.5% at all times.
-It is mandatory for all scheduled banks to file STRs within 7 days.
-Every entity should conduct quarterly audits of KYC compliance.
-"""
+async def main():
+    repo = ObligationRepository()
+    obligations = await repo.get_all_obligations()
 
-results = extract_obligation_metadata(sample_text)
+    print("\n--- All obligations in DB ---")
+    for doc in obligations:
+        print(doc)
 
-for i, item in enumerate(results, 1):
-    print(f"\nObligation {i}:")
-    print(item.model_dump_json(indent=2))
+if __name__ == "__main__":
+    asyncio.run(main())

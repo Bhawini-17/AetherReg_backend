@@ -1,13 +1,18 @@
-from transformers import pipeline
-import json
+import torch
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from obligation_schema import ObligationMetadata
+import json
+import re
 
-# Load the model pipeline
-nlp = pipeline("text-generation", model="tiiuae/falcon-rw-1b", tokenizer="tiiuae/falcon-rw-1b", max_new_tokens=256)
+# Load model and tokenizer (CPU)
+device = torch.device("cpu")
+model_name = "MBZUAI/LaMini-T5-738M"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
 
-def extract_obligation_metadata(text: str) -> ObligationMetadata:
+def extract_obligations_from_text(text: str) -> list[ObligationMetadata]:
     prompt = f"""
-Extract the following obligation metadata fields from the given text and return as JSON:
+Extract the following obligation metadata fields from the given text and return as JSON list:
 1. obligation_text
 2. issuer
 3. circular_id
@@ -19,52 +24,55 @@ Extract the following obligation metadata fields from the given text and return 
 9. penalty
 10. reference_clause
 
-Example:
-
 Text:
-\"\"\"As per RBI/2023-24/45, regulated entities must update KYC data annually. Deadline: March 31. Non-compliance may attract penalty.\"\"\"
-
-Output:
-{{
-  "obligation_text": "Regulated entities must update KYC data annually.",
-  "issuer": "RBI",
-  "circular_id": "RBI/2023-24/45",
-  "effective_date": null,
-  "frequency": "Annually",
-  "action_required": "Update KYC data",
-  "compliance_area": "KYC",
-  "deadline": "March 31",
-  "penalty": "Yes",
-  "reference_clause": null
-}}
-
-Now extract from this text:
-
 \"\"\"{text}\"\"\"
 
-Return only the JSON.
+Output:
 """
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model.generate(**inputs, max_new_tokens=512)
+    raw_output = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
 
+    # Try JSON parse
     try:
-        response = nlp(prompt)[0]["generated_text"]
-        json_start = response.find('{')
-        json_str = response[json_start:]
-        metadata_dict = json.loads(json_str)
+        json_start = raw_output.find("{")
+        if json_start == -1:
+            raise ValueError("No JSON found")
 
-        return ObligationMetadata(**metadata_dict)
-    
+        json_str = raw_output[json_start:]
+        data = json.loads(json_str)
+
+        if isinstance(data, dict):
+            data = [data]
+
+        return [ObligationMetadata(**item) for item in data]
+
     except Exception as e:
-        print("Error extracting obligation metadata:", e)
-        print("Raw model output:", response)
-        return ObligationMetadata(
-            obligation_text=text,
-            issuer=None,
-            circular_id=None,
-            effective_date=None,
-            frequency=None,
-            action_required=None,
-            compliance_area=None,
-            deadline=None,
-            penalty=None,
-            reference_clause=None
-        )
+        print("❌ Error extracting obligation metadata:", e)
+        print("Raw model output:\n", raw_output)
+
+        # Attempt regex fallback
+        fields = {
+            "obligation_text": r"obligation_text[:\-–]\s*\"?([^\"]+)\"?",
+            "issuer": r"Issuer[:\-–]\s*\"?([^\"]+)\"?",
+            "circular_id": r"Circular_id[:\-–]\s*\"?([^\"]+)\"?",
+            "effective_date": r"Effective date[:\-–]\s*\"?([^\"]+)\"?",
+            "frequency": r"Frequency[:\-–]\s*\"?([^\"]+)\"?",
+            "action_required": r"Action_required[:\-–]\s*\"?([^\"]+)\"?",
+            "compliance_area": r"Compliance area[:\-–]\s*\"?([^\"]+)\"?",
+            "deadline": r"Deadline[:\-–]\s*\"?([^\"]+)\"?",
+            "penalty": r"Penalty[:\-–]\s*\"?([^\"]+)\"?",
+            "reference_clause": r"Reference_clause[:\-–]\s*\"?([^\"]+)\"?",
+        }
+
+        extracted = {}
+        for key, pattern in fields.items():
+            match = re.search(pattern, raw_output, re.IGNORECASE)
+            if match:
+                extracted[key] = match.group(1).strip()
+
+        if "obligation_text" in extracted:
+            return [ObligationMetadata(**extracted)]
+
+        return []
