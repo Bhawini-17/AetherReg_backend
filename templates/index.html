@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RBI Circulars Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 40px; background: #f9f9f9; }
+        h1 { color: #2c3e50; }
+        ul { list-style-type: none; padding: 0; }
+        li {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-left: 5px solid #007acc;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        a { color: #007acc; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>📄 RBI Circulars</h1>
+    <ul>
+        {% for circular in circulars %}
+            <li>
+                <div><strong>{{ circular.title }}</strong></div>
+                <div><a href="{{ circular.url }}" target="_blank">📎 View PDF</a></div>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
