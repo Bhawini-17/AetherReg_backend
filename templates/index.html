@@ -1,31 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RBI Circulars Dashboard</title>
+    <title>AetherReg Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 40px; background: #f9f9f9; }
-        h1 { color: #2c3e50; }
-        ul { list-style-type: none; padding: 0; }
-        li {
-            background: white;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            color: #343a40;
+        }
+        .circular {
+            background-color: white;
             margin-bottom: 20px;
             padding: 20px;
-            border-left: 5px solid #007acc;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        a { color: #007acc; text-decoration: none; font-weight: bold; }
-        a:hover { text-decoration: underline; }
+        .circular h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .meta {
+            margin-top: 5px;
+            color: #6c757d;
+        }
+        .pdf-link {
+            margin-top: 10px;
+            display: inline-block;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .pdf-link:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <h1>📄 RBI Circulars</h1>
-    <ul>
-        {% for circular in circulars %}
-            <li>
-                <div><strong>{{ circular.title }}</strong></div>
-                <div><a href="{{ circular.url }}" target="_blank">📎 View PDF</a></div>
-            </li>
+    <h1>AetherReg – Circulars</h1>
+
+    {% if circulars %}
+        {% for c in circulars %}
+            <div class="circular">
+                <h3>{{ c.title or 'Untitled Circular' }}</h3>
+                <div class="meta">
+                    <p><strong>Issuer:</strong> {{ c.issuer or 'N/A' }}</p>
+                    <p><strong>Date:</strong> {{ c.date or 'N/A' }}</p>
+                    <p><strong>Description:</strong> {{ c.description or 'No description available.' }}</p>
+                </div>
+                {% if c.pdf_url %}
+                    <a class="pdf-link" href="{{ c.pdf_url }}" target="_blank">View PDF</a>
+                {% else %}
+                    <p><em>No PDF available.</em></p>
+                {% endif %}
+            </div>
         {% endfor %}
-    </ul>
+    {% else %}
+        <p>No circulars found.</p>
+    {% endif %}
 </body>
 </html>

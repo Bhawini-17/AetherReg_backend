@@ -1,42 +1,25 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, jsonify, render_template
 from pymongo import MongoClient
-from datetime import datetime, timedelta
+import os
 
 app = Flask(__name__)
 
-# Connect to MongoDB
-client = MongoClient("mongodb://localhost:27017/")
+# MongoDB connection
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+client = MongoClient(MONGO_URI)
 db = client["aetherreg"]
-circulars_collection = db["circulars"]
 obligations_collection = db["obligations"]
 
+# Home route (optional)
 @app.route("/")
-def index():
-    circulars = list(circulars_collection.find())
-    return render_template("index.html", circulars=circulars)
+def home():
+    return "<h2>AetherReg Backend is Running</h2>"
 
-@app.route("/api/dashboard", methods=["GET"])
-def dashboard():
-    total = obligations_collection.count_documents({})
-    completed = obligations_collection.count_documents({"status": "completed"})
-    pending = obligations_collection.count_documents({"status": "pending"})
-
-    today = datetime.today()
-    upcoming_deadline = today + timedelta(days=7)
-    upcoming = obligations_collection.count_documents({
-        "deadline": {
-            "$gte": today,
-            "$lte": upcoming_deadline
-        },
-        "status": "pending"
-    })
-
-    return jsonify({
-        "total_obligations": total,
-        "completed_obligations": completed,
-        "pending_obligations": pending,
-        "upcoming_deadlines": upcoming
-    })
+# Obligations API route
+@app.route("/api/obligations")
+def get_obligations():
+    obligations = list(obligations_collection.find({}, {"_id": 0}))  # Exclude _id
+    return jsonify(obligations)
 
 if __name__ == "__main__":
     app.run(debug=True)
