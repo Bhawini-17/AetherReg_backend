@@ -4,4 +4,4 @@ text = "All banks must submit the KYC compliance report by 30th September 2025. 
 
 tasks = generate_tasks(text)
 
-print("📌 Extracted Tasks:\n", tasks)
+print("Extracted Tasks:\n", tasks)

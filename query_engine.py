@@ -8,7 +8,7 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import HuggingFacePipeline
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 
-# 1. Load PDF and extract text
+
 def load_pdf_text(file_path):
     text = ""
     with pdfplumber.open(file_path) as pdf:
@@ -16,17 +16,17 @@ def load_pdf_text(file_path):
             text += page.extract_text() + "\n"
     return text
 
-# 2. Convert text into Document chunks
+
 def split_text_into_docs(text):
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     return [Document(page_content=chunk) for chunk in text_splitter.split_text(text)]
 
-# 3. Create vector store with FAISS
+
 def create_vector_store(documents):
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     return FAISS.from_documents(documents, embeddings)
 
-# 4. Load local LLM (FLAN-T5)
+
 def load_local_llm():
     model_name = "google/flan-t5-base"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -34,9 +34,9 @@ def load_local_llm():
     pipe = pipeline("text2text-generation", model=model, tokenizer=tokenizer, max_length=512)
     return HuggingFacePipeline(pipeline=pipe)
 
-# 5. Main query function
+
 def main():
-    pdf_path = "docs/rbi_circular.pdf"  # replace with your PDF
+    pdf_path = "docs/rbi_circular.pdf"  
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"{pdf_path} not found!")
 

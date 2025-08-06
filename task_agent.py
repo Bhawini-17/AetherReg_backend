@@ -1,6 +1,4 @@
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
-
-# This model works locally and does NOT require sentencepiece
 model_id = "MBZUAI/LaMini-T5-738M"
 
 tokenizer = AutoTokenizer.from_pretrained(model_id)

@@ -2,7 +2,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from obligation_schema import ObligationMetadata
 from typing import List
 
-# MongoDB setup
 client = AsyncIOMotorClient("mongodb://localhost:27017")
 db = client["aetherreg"]
 

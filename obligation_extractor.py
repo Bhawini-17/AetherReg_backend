@@ -4,7 +4,6 @@ from obligation_schema import ObligationMetadata
 import json
 import re
 
-# Load model and tokenizer (CPU)
 device = torch.device("cpu")
 model_name = "MBZUAI/LaMini-T5-738M"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -34,7 +33,7 @@ Output:
         outputs = model.generate(**inputs, max_new_tokens=512)
     raw_output = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
 
-    # Try JSON parse
+   
     try:
         json_start = raw_output.find("{")
         if json_start == -1:
@@ -49,10 +48,9 @@ Output:
         return [ObligationMetadata(**item) for item in data]
 
     except Exception as e:
-        print("❌ Error extracting obligation metadata:", e)
+        print("Error extracting obligation metadata:", e)
         print("Raw model output:\n", raw_output)
 
-        # Attempt regex fallback
         fields = {
             "obligation_text": r"obligation_text[:\-–]\s*\"?([^\"]+)\"?",
             "issuer": r"Issuer[:\-–]\s*\"?([^\"]+)\"?",

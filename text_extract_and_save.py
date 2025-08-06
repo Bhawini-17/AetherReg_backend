@@ -12,12 +12,12 @@ async def run():
     obligations = extract_obligations_from_text(sample_text)
     
     if not obligations: 
-        print("❌ No obligations extracted.")
+        print(" No obligations extracted.")
         return
     
     for obligation in obligations:
         inserted_id = await repo.save_obligation(obligation)
-        print(f"✅ Saved obligation with ID: {inserted_id}")
+        print(f" Saved obligation with ID: {inserted_id}")
 
 if __name__ == "__main__":
     asyncio.run(run())

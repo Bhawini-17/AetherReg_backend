@@ -12,6 +12,6 @@ async def create_index():
         ("action_required", "text"),
         ("compliance_area", "text")
     ])
-    print("✅ Text index created.")
+    print("Text index created.")
 
 asyncio.run(create_index())

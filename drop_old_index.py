@@ -1,9 +1,9 @@
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://localhost:27017/")
-db = client["aetherreg"]  # replace with your actual DB name
+db = client["aetherreg"]  
 collection = db["obligations"]
 
-# Drop all indexes (except _id)
+
 collection.drop_indexes()
 print("All indexes dropped successfully.")

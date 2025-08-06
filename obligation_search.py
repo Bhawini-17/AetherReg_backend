@@ -8,18 +8,18 @@ async def search_obligations(query: str):
     return results
 
 async def search_loop():
-    query = input("🔍 Enter search query: ").strip()
+    query = input(" Enter search query: ").strip()
     if not query:
-        print("⚠️ Please enter a valid search query.")
+        print(" Please enter a valid search query.")
         return
 
     results = await search_obligations(query)
 
     if not results:
-        print("❌ No obligations found.")
+        print(" No obligations found.")
         return
 
-    print(f"\n✅ Found {len(results)} obligation(s):\n")
+    print(f"\nFound {len(results)} obligation(s):\n")
 
     for ob in results:
         print(f"\n- {ob.obligation_text}")

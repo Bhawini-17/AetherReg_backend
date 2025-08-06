@@ -4,24 +4,20 @@ import os
 
 app = Flask(__name__)
 
-# MongoDB connection
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 client = MongoClient(MONGO_URI)
 db = client["aetherreg"]
 obligations_collection = db["obligations"]
 
-# Home route
 @app.route("/")
 def home():
     return "<h2>AetherReg Backend is Running</h2>"
 
-# Obligations route
 @app.route("/api/obligations", methods=["GET"])
 def get_obligations():
     obligations = list(obligations_collection.find({}, {"_id": 0}))
     return jsonify(obligations)
 
-# ✅ File upload route
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if 'file' not in request.files:

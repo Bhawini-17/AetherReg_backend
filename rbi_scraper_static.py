@@ -7,13 +7,13 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["aetherreg"]
 circulars_collection = db["circulars"]
 
-# Fetch RBI circulars page
+# RBI circulars page
 url = "https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx"
 print("🔎 Fetching RBI circulars page...")
 response = requests.get(url)
 soup = BeautifulSoup(response.content, "html.parser")
 
-# Find PDF links
+# PDF links
 pdf_links = []
 for link in soup.find_all("a", href=True):
     href = link["href"]
@@ -24,16 +24,15 @@ for link in soup.find_all("a", href=True):
             title = "Untitled Circular"
         pdf_links.append({"title": title, "url": full_url})
 
-# Remove duplicates by URL
 unique_links = {c["url"]: c for c in pdf_links}.values()
-print(f"✅ Found {len(unique_links)} unique circulars.\n")
+print(f"Found {len(unique_links)} unique circulars.\n")
 
-# Save to MongoDB
+
 inserted_count = 0
 for circular in unique_links:
-    if not circulars_collection.find_one({"url": circular["url"]}):  # avoid duplicates
+    if not circulars_collection.find_one({"url": circular["url"]}):  
         circulars_collection.insert_one(circular)
         inserted_count += 1
     print(f"🔹 {circular['title']}\n   📎 {circular['url']}\n")
 
-print(f"🗂️ {inserted_count} new circular(s) saved to MongoDB.")
+print(f"{inserted_count} new circular(s) saved to MongoDB.")
